@@ -4,7 +4,7 @@ Laravel-Elixir [webpack](https://github.com/webpack/webpack) extension.
 
 ## Install
 ```
-nam install laravel-elixir-webpack-ex —-save
+npm install git+ssh://git@github.com/SergeyMiracle/laravel-elixir-webpack-ex.git —-save
 ```
 
 ## Usage
