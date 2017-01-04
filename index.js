@@ -1,64 +1,63 @@
-var gulp = require('gulp');
-var path = require('path');
-var Elixir = require('laravel-elixir');
-var webpack = require('webpack-stream');
-var named = require('vinyl-named');
-var _ = require('lodash');
+const gulp = require('gulp')
+const path = require('path')
+const Elixir = require('laravel-elixir')
+const webpack = require('webpack-stream')
+const named = require('vinyl-named')
+const _ = require('lodash')
 
-var Task = Elixir.Task;
-var Notification = Elixir.Notification;
-var config = Elixir.config;
-var $ = Elixir.Plugins;
+let Task = Elixir.Task
+let config = Elixir.config
+let $ = Elixir.Plugins
 
-Elixir.extend('webpack', function(src, options, output, baseDir) {
-  var paths = prepGulpPaths(src, baseDir, output);
+Elixir.extend('webpack', function (src, options, output, baseDir) {
+  let paths = prepGulpPaths(src, baseDir, output)
 
   if (_.isPlainObject(src)) {
-    var entry = _.mapValues(src, function(script) {
-      return './' + path.join(paths.src.baseDir, script);
-    });
-    
+    let entry = _.mapValues(src, function (script) {
+      return './' + path.join(paths.src.baseDir, script)
+    })
+
     // Don't scuff my puma's brah.
-    var output = _.assign({
+    let output = _.assign({
       filename: '[name].js'
     }, options.output)
 
     options = _.assign({}, options, {
       entry: entry,
-      output: output,
-    });
+      output: output
+    })
   }
 
-  new Task('webpack', function() {
-    var saveFiles;
+  new Task('webpack', function () {
+    let saveFiles
 
     if (_.isArray(src)) {
-      saveFiles = _.map(paths.src.path, function(file) {
-        return path.join(paths.output.baseDir, path.basename(file, path.extname(file)) + '.js');
-      });
+      saveFiles = _.map(paths.src.path, function (file) {
+        return path.join(paths.output.baseDir, path.basename(file, path.extname(file)) + '.js')
+      })
     } else if (_.isPlainObject(src)) {
-      saveFiles = _.map(_.keys(src), function(file) {
-        return path.join(paths.output.baseDir, file + '.js');
-      });
+      saveFiles = _.map(_.keys(src), function (file) {
+        return path.join(paths.output.baseDir, file + '.js')
+      })
     } else {
-      saveFiles = paths.output;
+      saveFiles = paths.output
     }
 
-    this.log(paths.src, saveFiles);
+    this.log(paths.src, saveFiles)
 
     return gulp.src(paths.src.path)
       .pipe(named())
       .pipe(webpack(options))
-      .on('error', function(e) {
-        (new Notification).error(e, 'Webpack Compilation Failed!');
+      .on('error', function (e) {
+        (new Elixir.Notification).error(e, 'Webpack Compilation Failed!')
 
-        this.emit('end');
+        this.emit('end')
       })
       .pipe(gulp.dest(paths.output.baseDir))
-      .pipe(new Elixir.Notification('Webpack Compiled!'));
+      .pipe(new Elixir.Notification('Webpack Compiled!'))
   })
-  .watch(paths.src.baseDir + '/**/*');
-});
+    .watch(paths.src.baseDir + '/**/*')
+})
 
 /**
  * Prep the Gulp src and output paths.
@@ -67,14 +66,14 @@ Elixir.extend('webpack', function(src, options, output, baseDir) {
  * @param  {string}       baseDir
  * @param  {string|null}  output
  */
-var prepGulpPaths = function(src, baseDir, output) {
-  baseDir = baseDir || config.get('assets.js.folder');
+var prepGulpPaths = function (src, baseDir, output) {
+  baseDir = baseDir || config.get('assets.js.folder')
 
   if (_.isObject(src)) {
-    src = _.values(src);
+    src = _.values(src)
   }
 
   return new Elixir.GulpPaths()
     .src(src, baseDir)
-    .output(output || config.get('public.js.outputFolder'), 'app.js');
-};
+    .output(output || config.get('public.js.outputFolder'), 'app.js')
+}
